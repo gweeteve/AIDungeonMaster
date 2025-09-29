@@ -1,0 +1,785 @@
+openapi: 3.0.3
+info:
+  title: Game System Management API
+  description: API for managing RPG game systems and their associated documents
+  version: 1.0.0
+  contact:
+    name: AI Dungeon Master Team
+
+servers:
+  - url: http://localhost:3001/api
+    description: Development server
+  - url: https://api.aidungeonmaster.com
+    description: Production server
+
+paths:
+  /game-systems:
+    get:
+      summary: List all game systems
+      description: Get all game systems visible to the current user
+      tags: [Game Systems]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search in system names and descriptions
+        - name: ownerId
+          in: query
+          schema:
+            type: string
+          description: Filter by owner ID
+      responses:
+        '200':
+          description: List of game systems
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GameSystem'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      summary: Create a new game system
+      description: Create a new game system or derive from an existing one
+      tags: [Game Systems]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameSystemRequest'
+      responses:
+        '201':
+          description: Game system created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSystem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Game system name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /game-systems/{id}:
+    get:
+      summary: Get a specific game system
+      description: Retrieve details of a specific game system
+      tags: [Game Systems]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Game system details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSystemDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      summary: Update a game system
+      description: Update game system metadata (name, description, image)
+      tags: [Game Systems]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGameSystemRequest'
+      responses:
+        '200':
+          description: Game system updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSystem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: System is currently locked by another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      summary: Delete a game system
+      description: Archive a game system (soft delete to preserve references)
+      tags: [Game Systems]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Game system deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Cannot delete system in use by active sessions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /game-systems/{id}/lock:
+    post:
+      summary: Acquire edit lock
+      description: Acquire exclusive edit lock for a game system
+      tags: [Game Systems]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lock acquired successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EditLock'
+        '409':
+          description: System is already locked by another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      summary: Release edit lock
+      description: Release edit lock for a game system
+      tags: [Game Systems]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Lock released successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /game-systems/{id}/documents:
+    get:
+      summary: List documents in a game system
+      description: Get all documents belonging to a specific game system
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [JSON, PDF, MARKDOWN]
+          description: Filter by document type
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Filter by tags
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Document'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      summary: Upload a document
+      description: Upload a new document to a game system
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The document file to upload
+                displayName:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: User-friendly name for the document
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags for organizing the document
+              required:
+                - file
+                - displayName
+      responses:
+        '201':
+          description: Document uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: System is locked or document name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Invalid file type or JSON validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /documents/{id}:
+    get:
+      summary: Get document metadata
+      description: Get metadata for a specific document
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      summary: Update document metadata
+      description: Update document display name and tags
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDocumentRequest'
+      responses:
+        '200':
+          description: Document updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Game system is locked or name conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      summary: Delete a document
+      description: Remove a document from a game system
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Document deleted successfully
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Game system is locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /documents/{id}/download:
+    get:
+      summary: Download document content
+      description: Download the actual file content of a document
+      tags: [Documents]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Document file content
+          content:
+            application/json:
+              description: For JSON documents
+            application/pdf:
+              description: For PDF documents
+            text/markdown:
+              description: For Markdown documents
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    GameSystem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        imageUrl:
+          type: string
+          format: uri
+        ownerId:
+          type: string
+          format: uuid
+        parentSystemId:
+          type: string
+          format: uuid
+        isPublic:
+          type: boolean
+        editLockUserId:
+          type: string
+          format: uuid
+        editLockExpiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        syncWithParent:
+          type: boolean
+      required:
+        - id
+        - name
+        - ownerId
+        - isPublic
+        - createdAt
+        - updatedAt
+        - syncWithParent
+
+    GameSystemDetail:
+      allOf:
+        - $ref: '#/components/schemas/GameSystem'
+        - type: object
+          properties:
+            documents:
+              type: array
+              items:
+                $ref: '#/components/schemas/Document'
+            derivedSystems:
+              type: array
+              items:
+                $ref: '#/components/schemas/GameSystem'
+            parentSystem:
+              $ref: '#/components/schemas/GameSystem'
+            validationSchema:
+              type: object
+              description: JSON Schema for validating uploaded JSON documents
+
+    CreateGameSystemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        imageUrl:
+          type: string
+          format: uri
+        parentSystemId:
+          type: string
+          format: uuid
+          description: ID of system to derive from (optional)
+        syncWithParent:
+          type: boolean
+          default: true
+          description: Whether to sync changes from parent (for derived systems)
+        validationSchema:
+          type: object
+          description: JSON Schema for validating JSON documents
+      required:
+        - name
+
+    UpdateGameSystemRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        imageUrl:
+          type: string
+          format: uri
+        syncWithParent:
+          type: boolean
+        validationSchema:
+          type: object
+
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        gameSystemId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        filename:
+          type: string
+        type:
+          type: string
+          enum: [JSON, PDF, MARKDOWN]
+        fileSize:
+          type: integer
+          minimum: 0
+        mimeType:
+          type: string
+        uploadedBy:
+          type: string
+          format: uuid
+        checksum:
+          type: string
+        validationErrors:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        version:
+          type: integer
+          minimum: 1
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - gameSystemId
+        - displayName
+        - filename
+        - type
+        - fileSize
+        - mimeType
+        - uploadedBy
+        - checksum
+        - validationErrors
+        - tags
+        - version
+        - isActive
+        - createdAt
+        - updatedAt
+
+    DocumentDetail:
+      allOf:
+        - $ref: '#/components/schemas/Document'
+        - type: object
+          properties:
+            gameSystem:
+              $ref: '#/components/schemas/GameSystem'
+            uploader:
+              $ref: '#/components/schemas/User'
+            previousVersions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Document'
+
+    UpdateDocumentRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        tags:
+          type: array
+          items:
+            type: string
+
+    EditLock:
+      type: object
+      properties:
+        gameSystemId:
+          type: string
+          format: uuid
+        lockedBy:
+          type: string
+          format: uuid
+        expiresAt:
+          type: string
+          format: date-time
+        acquiredAt:
+          type: string
+          format: date-time
+      required:
+        - gameSystemId
+        - lockedBy
+        - expiresAt
+        - acquiredAt
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+      required:
+        - id
+        - username
+        - displayName
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        statusCode:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - error
+        - message
+        - statusCode
+        - timestamp
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            validationErrors:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+                  value:
+                    description: The invalid value
+                required:
+                  - field
+                  - message
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters or request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Game Systems
+    description: Operations for managing RPG game systems
+  - name: Documents
+    description: Operations for managing documents within game systems
