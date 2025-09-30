@@ -41,80 +41,80 @@
 - Backend: NestJS + TypeScript + LiteDB
 
 ## Phase 3.1: Setup
-- [ ] T001 Create backend project structure with NestJS CLI and initialize package.json
-- [ ] T002 Create frontend project structure with Next.js 14 and configure app router
-- [ ] T003 [P] Configure TypeScript strict mode in backend/tsconfig.json
-- [ ] T004 [P] Configure TypeScript strict mode in frontend/tsconfig.json
-- [ ] T005 [P] Setup ESLint and Prettier for backend in backend/.eslintrc.js
-- [ ] T006 [P] Setup ESLint and Prettier for frontend in frontend/.eslintrc.js
-- [ ] T007 [P] Install backend dependencies: NestJS, LiteDB, class-validator, multer
-- [ ] T008 [P] Install frontend dependencies: Tailwind, Radix UI, shadcn/ui, React Query
-- [ ] T009 [P] Configure Tailwind CSS in frontend/tailwind.config.js
-- [ ] T010 [P] Initialize shadcn/ui components in frontend/src/components/ui/
+- [x] T001 Create backend project structure with NestJS CLI and initialize package.json
+- [x] T002 Create frontend project structure with Next.js 14 and configure app router
+- [x] T003 [P] Configure TypeScript strict mode in backend/tsconfig.json
+- [x] T004 [P] Configure TypeScript strict mode in frontend/tsconfig.json
+- [x] T005 [P] Setup ESLint and Prettier for backend in backend/.eslintrc.js
+- [x] T006 [P] Setup ESLint and Prettier for frontend in frontend/.eslintrc.js
+- [x] T007 [P] Install backend dependencies: NestJS, LiteDB, class-validator, multer
+- [x] T008 [P] Install frontend dependencies: Tailwind, Radix UI, shadcn/ui, React Query
+- [x] T009 [P] Configure Tailwind CSS in frontend/tailwind.config.js
+- [x] T010 [P] Initialize shadcn/ui components in frontend/src/components/ui/
 
 ## Phase 3.2: Tests First (TDD) ⚠️ MUST COMPLETE BEFORE 3.3
 **CRITICAL: These tests MUST be written and MUST FAIL before ANY implementation**
 
 ### Contract Tests
-- [ ] T011 [P] Contract test GET /api/game-systems in backend/tests/contract/game-systems-list.test.ts
-- [ ] T012 [P] Contract test POST /api/game-systems in backend/tests/contract/game-systems-create.test.ts
-- [ ] T013 [P] Contract test GET /api/game-systems/:id in backend/tests/contract/game-systems-get.test.ts
-- [ ] T014 [P] Contract test PUT /api/game-systems/:id in backend/tests/contract/game-systems-update.test.ts
-- [ ] T015 [P] Contract test DELETE /api/game-systems/:id in backend/tests/contract/game-systems-delete.test.ts
-- [ ] T016 [P] Contract test POST /api/game-systems/:id/lock in backend/tests/contract/game-systems-lock.test.ts
-- [ ] T017 [P] Contract test DELETE /api/game-systems/:id/lock in backend/tests/contract/game-systems-unlock.test.ts
-- [ ] T018 [P] Contract test GET /api/game-systems/:id/documents in backend/tests/contract/documents-list.test.ts
-- [ ] T019 [P] Contract test POST /api/game-systems/:id/documents in backend/tests/contract/documents-upload.test.ts
-- [ ] T020 [P] Contract test GET /api/documents/:id in backend/tests/contract/documents-get.test.ts
-- [ ] T021 [P] Contract test PUT /api/documents/:id in backend/tests/contract/documents-update.test.ts
-- [ ] T022 [P] Contract test DELETE /api/documents/:id in backend/tests/contract/documents-delete.test.ts
-- [ ] T023 [P] Contract test GET /api/documents/:id/download in backend/tests/contract/documents-download.test.ts
+- [x] T011 [P] Contract test GET /api/game-systems in backend/tests/contract/game-systems-list.test.ts
+- [x] T012 [P] Contract test POST /api/game-systems in backend/tests/contract/game-systems-create.test.ts
+- [x] T013 [P] Contract test GET /api/game-systems/:id in backend/tests/contract/game-systems-get.test.ts
+- [x] T014 [P] Contract test PUT /api/game-systems/:id in backend/tests/contract/game-systems-update.test.ts
+- [x] T015 [P] Contract test DELETE /api/game-systems/:id in backend/tests/contract/game-systems-delete.test.ts
+- [x] T016 [P] Contract test POST /api/game-systems/:id/lock in backend/tests/contract/game-systems-lock.test.ts
+- [x] T017 [P] Contract test DELETE /api/game-systems/:id/lock in backend/tests/contract/game-systems-unlock.test.ts
+- [x] T018 [P] Contract test GET /api/game-systems/:id/documents in backend/tests/contract/documents-list.test.ts
+- [x] T019 [P] Contract test POST /api/game-systems/:id/documents in backend/tests/contract/documents-upload.test.ts
+- [x] T020 [P] Contract test GET /api/documents/:id in backend/tests/contract/documents-get.test.ts
+- [x] T021 [P] Contract test PUT /api/documents/:id in backend/tests/contract/documents-update.test.ts
+- [x] T022 [P] Contract test DELETE /api/documents/:id in backend/tests/contract/documents-delete.test.ts
+- [x] T023 [P] Contract test GET /api/documents/:id/download in backend/tests/contract/documents-download.test.ts
 
 ### Integration Tests
-- [ ] T024 [P] Integration test complete game system creation workflow in backend/tests/integration/game-system-creation.test.ts
-- [ ] T025 [P] Integration test document upload and validation workflow in backend/tests/integration/document-upload.test.ts
-- [ ] T026 [P] Integration test system derivation workflow in backend/tests/integration/system-derivation.test.ts
-- [ ] T027 [P] Integration test edit locking workflow in backend/tests/integration/edit-locking.test.ts
-- [ ] T028 [P] Integration test JSON validation workflow in backend/tests/integration/json-validation.test.ts
+- [x] T024 [P] Integration test complete game system creation workflow in backend/tests/integration/game-system-creation.test.ts
+- [x] T025 [P] Integration test document upload and validation workflow in backend/tests/integration/document-upload.test.ts
+- [x] T026 [P] Integration test system derivation workflow in backend/tests/integration/system-derivation.test.ts
+- [x] T027 [P] Integration test edit locking workflow in backend/tests/integration/edit-locking.test.ts
+- [x] T028 [P] Integration test JSON validation workflow in backend/tests/integration/json-validation.test.ts
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 
 ### Backend Models
-- [ ] T029 [P] GameSystem entity in backend/src/models/game-system.model.ts
-- [ ] T030 [P] Document entity in backend/src/models/document.model.ts
-- [ ] T031 [P] User entity in backend/src/models/user.model.ts
-- [ ] T032 [P] Create TypeScript interfaces in backend/src/types/index.ts
+- [x] T029 [P] GameSystem entity in backend/src/models/game-system.model.ts
+- [x] T030 [P] Document entity in backend/src/models/document.model.ts
+- [x] T031 [P] User entity in backend/src/models/user.model.ts
+- [x] T032 [P] Create TypeScript interfaces in backend/src/types/index.ts
 
 ### Backend Services
-- [ ] T033 GameSystemService CRUD operations in backend/src/services/game-system.service.ts
-- [ ] T034 DocumentService CRUD operations in backend/src/services/document.service.ts
-- [ ] T035 [P] ValidationService for JSON schemas in backend/src/services/validation.service.ts
-- [ ] T036 [P] FileStorageService for document files in backend/src/services/file-storage.service.ts
-- [ ] T037 [P] LockService for edit locking in backend/src/services/lock.service.ts
+- [x] T033 GameSystemService CRUD operations in backend/src/services/game-system.service.ts
+- [x] T034 DocumentService CRUD operations in backend/src/services/document.service.ts
+- [x] T035 [P] ValidationService for JSON schemas in backend/src/services/validation.service.ts
+- [x] T036 [P] FileStorageService for document files in backend/src/services/file-storage.service.ts
+- [x] T037 [P] LockService for edit locking in backend/src/services/lock.service.ts
 
 ### Backend Controllers
-- [ ] T038 GameSystemsController with all endpoints in backend/src/controllers/game-systems.controller.ts
-- [ ] T039 DocumentsController with all endpoints in backend/src/controllers/documents.controller.ts
+- [x] T038 GameSystemsController with all endpoints in backend/src/controllers/game-systems.controller.ts
+- [x] T039 DocumentsController with all endpoints in backend/src/controllers/documents.controller.ts
 
 ### Frontend Types and Services
-- [ ] T040 [P] TypeScript types mirroring backend in frontend/src/types/game-system.types.ts
-- [ ] T041 [P] TypeScript types for documents in frontend/src/types/document.types.ts
-- [ ] T042 [P] API service for game systems in frontend/src/services/game-system.service.ts
-- [ ] T043 [P] API service for documents in frontend/src/services/document.service.ts
+- [x] T040 [P] TypeScript types mirroring backend in frontend/src/types/game-system.types.ts
+- [x] T041 [P] TypeScript types for documents in frontend/src/types/document.types.ts
+- [x] T042 [P] API service for game systems in frontend/src/services/game-system.service.ts
+- [x] T043 [P] API service for documents in frontend/src/services/document.service.ts
 
 ### Frontend Core Components
-- [ ] T044 [P] GameSystemCard component in frontend/src/components/game-systems/game-system-card.tsx
-- [ ] T045 [P] GameSystemList component in frontend/src/components/game-systems/game-system-list.tsx
-- [ ] T046 [P] CreateGameSystemForm component in frontend/src/components/game-systems/create-form.tsx
-- [ ] T047 [P] EditGameSystemForm component in frontend/src/components/game-systems/edit-form.tsx
-- [ ] T048 [P] DocumentCard component in frontend/src/components/documents/document-card.tsx
-- [ ] T049 [P] DocumentUpload component in frontend/src/components/documents/document-upload.tsx
-- [ ] T050 [P] DocumentList component in frontend/src/components/documents/document-list.tsx
+- [x] T044 [P] GameSystemCard component in frontend/src/components/game-systems/game-system-card.tsx
+- [x] T045 [P] GameSystemList component in frontend/src/components/game-systems/game-system-list.tsx
+- [x] T046 [P] CreateGameSystemForm component in frontend/src/components/game-systems/create-form.tsx
+- [x] T047 [P] EditGameSystemForm component in frontend/src/components/game-systems/edit-form.tsx
+- [x] T048 [P] DocumentCard component in frontend/src/components/documents/document-card.tsx
+- [x] T049 [P] DocumentUpload component in frontend/src/components/documents/document-upload.tsx
+- [x] T050 [P] DocumentList component in frontend/src/components/documents/document-list.tsx
 
 ### Frontend Pages
-- [ ] T051 Game systems listing page in frontend/src/app/game-systems/page.tsx
-- [ ] T052 Game system details page in frontend/src/app/game-systems/[id]/page.tsx
-- [ ] T053 Create game system page in frontend/src/app/game-systems/create/page.tsx
+- [x] T051 Game systems listing page in frontend/src/app/game-systems/page.tsx
+- [x] T052 Game system details page in frontend/src/app/game-systems/[id]/page.tsx
+- [x] T053 Create game system page in frontend/src/app/game-systems/create/page.tsx
 
 ## Phase 3.4: Integration
 
