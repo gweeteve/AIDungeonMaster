@@ -1,0 +1,235 @@
+openapi: 3.0.3
+info:
+  title: Homepage World Management API
+  description: REST API for managing worlds and game systems on the homepage
+  version: 1.0.0
+
+paths:
+  /api/worlds:
+    get:
+      summary: Get all worlds for homepage display
+      description: Returns all worlds sorted by last accessed date (most recent first)
+      responses:
+        '200':
+          description: List of worlds with embedded game system info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorldResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a new world
+      description: Creates a new world and immediately returns it
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorldRequest'
+      responses:
+        '201':
+          description: World created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorldResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/worlds/{worldId}/launch:
+    post:
+      summary: Launch a world
+      description: Updates lastAccessedAt timestamp and returns launch information
+      parameters:
+        - name: worldId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: World launched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LaunchResponse'
+        '404':
+          description: World not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/game-systems:
+    get:
+      summary: Get all active game systems
+      description: Returns all game systems available for world creation
+      responses:
+        '200':
+          description: List of active game systems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameSystemResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    WorldResponse:
+      type: object
+      required:
+        - id
+        - name
+        - gameSystem
+        - lastAccessedAt
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique world identifier
+        name:
+          type: string
+          description: User-provided world name
+          minLength: 1
+          maxLength: 255
+        imageUrl:
+          type: string
+          format: uri
+          description: Optional custom image URL
+        gameSystem:
+          $ref: '#/components/schemas/GameSystemSummary'
+        lastAccessedAt:
+          type: string
+          format: date-time
+          description: ISO timestamp of last access
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO timestamp of creation
+
+    CreateWorldRequest:
+      type: object
+      required:
+        - name
+        - gameSystemId
+      properties:
+        name:
+          type: string
+          description: World name
+          minLength: 1
+          maxLength: 255
+        gameSystemId:
+          type: string
+          description: ID of the game system to use
+        imageUrl:
+          type: string
+          format: uri
+          description: Optional custom image URL
+
+    LaunchResponse:
+      type: object
+      required:
+        - worldId
+        - launchUrl
+        - lastAccessedAt
+      properties:
+        worldId:
+          type: string
+          description: ID of the launched world
+        launchUrl:
+          type: string
+          description: URL to navigate to for the game session
+        lastAccessedAt:
+          type: string
+          format: date-time
+          description: Updated last access timestamp
+
+    GameSystemResponse:
+      type: object
+      required:
+        - id
+        - name
+        - defaultImageUrl
+        - isActive
+      properties:
+        id:
+          type: string
+          description: Unique game system identifier
+        name:
+          type: string
+          description: Game system name
+        defaultImageUrl:
+          type: string
+          format: uri
+          description: Default image for worlds using this system
+        description:
+          type: string
+          description: Optional system description
+        isActive:
+          type: boolean
+          description: Whether this system is available for new worlds
+
+    GameSystemSummary:
+      type: object
+      required:
+        - id
+        - name
+        - defaultImageUrl
+      properties:
+        id:
+          type: string
+          description: Game system ID
+        name:
+          type: string
+          description: Game system name
+        defaultImageUrl:
+          type: string
+          format: uri
+          description: Default image URL
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - statusCode
+      properties:
+        message:
+          type: string
+          description: Error message
+        statusCode:
+          type: integer
+          description: HTTP status code
+        details:
+          type: object
+          description: Additional error details
