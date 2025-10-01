@@ -9,19 +9,19 @@ export class WorldsService {
   constructor(private readonly liteDbService: LiteDbService) {}
 
   async findAll(): Promise<WorldResponse[]> {
-    const worldsCollection = await this.liteDbService.getCollection<World>('worlds');
-    const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-    
-    const worlds = await worldsCollection.findAll();
-    
-    // Sort by lastAccessedAt (most recent first)
-    worlds.sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime());
+  const worldsCollection = await this.liteDbService.getCollection<World>('worlds');
+  const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
+
+  const worlds = await worldsCollection.findAll() as World[];
+
+  // Sort by lastAccessedAt (most recent first)
+  worlds.sort((a: World, b: World) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime());
     
     // Enrich with game system data
     const worldResponses: WorldResponse[] = [];
     
     for (const world of worlds) {
-      const gameSystem = await gameSystemsCollection.findById(world.gameSystemId);
+  const gameSystem = await gameSystemsCollection.findById(world.gameSystemId) as GameSystem | null;
       
       if (gameSystem) {
         worldResponses.push({
@@ -44,7 +44,7 @@ export class WorldsService {
 
   async findById(id: string): Promise<World> {
     const worldsCollection = await this.liteDbService.getCollection<World>('worlds');
-    const world = await worldsCollection.findById(id);
+  const world = await worldsCollection.findById(id) as World | null;
     
     if (!world) {
       throw new NotFoundException(`World with ID ${id} not found`);
@@ -56,7 +56,7 @@ export class WorldsService {
   async create(createWorldRequest: CreateWorldRequest): Promise<WorldResponse> {
     // Validate game system exists
     const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-    const gameSystem = await gameSystemsCollection.findById(createWorldRequest.gameSystemId);
+  const gameSystem = await gameSystemsCollection.findById(createWorldRequest.gameSystemId) as GameSystem | null;
     
     if (!gameSystem) {
       throw new BadRequestException(`Game system with ID ${createWorldRequest.gameSystemId} not found`);
@@ -93,7 +93,7 @@ export class WorldsService {
     });
 
     const worldsCollection = await this.liteDbService.getCollection<World>('worlds');
-    const savedWorld = await worldsCollection.insert(world);
+  const savedWorld = await worldsCollection.insert(world) as World;
 
     return {
       id: savedWorld.id,

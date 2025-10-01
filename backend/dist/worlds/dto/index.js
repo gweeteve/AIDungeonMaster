@@ -55,4 +55,17 @@ exports.LaunchResponse = LaunchResponse;
 class ErrorResponse {
 }
 exports.ErrorResponse = ErrorResponse;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ErrorResponse.prototype, "message", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], ErrorResponse.prototype, "statusCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], ErrorResponse.prototype, "details", void 0);
 //# sourceMappingURL=index.js.map

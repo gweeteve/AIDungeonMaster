@@ -1,16 +1,17 @@
-import { IsString, IsOptional, IsUUID, IsObject, IsBoolean, IsUrl, Length } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsObject, IsBoolean, IsUrl, Length, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class GameSystem {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @Length(1, 100, { message: 'Game system name must be between 1 and 100 characters' })
-  name: string;
+  name!: string;
 
   @IsUrl({}, { message: 'Default image URL must be a valid URL' })
   @IsString()
-  defaultImageUrl: string;
+  defaultImageUrl!: string;
 
   @IsOptional()
   @IsString()
@@ -18,16 +19,18 @@ export class GameSystem {
   description?: string;
 
   @IsObject()
-  rulesetConfig: object;
+  rulesetConfig!: object;
 
   @IsBoolean()
-  isActive: boolean;
+  isActive!: boolean;
 
-  @IsString()
-  createdAt: Date;
+  @IsDate()
+  @Type(() => Date)
+  createdAt!: Date;
 
-  @IsString()
-  updatedAt: Date;
+  @IsDate()
+  @Type(() => Date)
+  updatedAt!: Date;
 
   constructor(data: Partial<GameSystem> = {}) {
     Object.assign(this, data);

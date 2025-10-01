@@ -9,16 +9,16 @@ export class GameSystemsService {
 
   async findAll(): Promise<GameSystem[]> {
     const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-    return await gameSystemsCollection.findAll();
+    return await gameSystemsCollection.findAll() as GameSystem[];
   }
 
   async findAllActive(): Promise<GameSystemResponse[]> {
     const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-    const allSystems = await gameSystemsCollection.findAll();
-    
-    const activeSystems = allSystems.filter(system => system.isActive);
-    
-    return activeSystems.map(system => system.toResponse());
+    const allSystems = await gameSystemsCollection.findAll() as GameSystem[];
+
+    const activeSystems = allSystems.filter((system: GameSystem) => system.isActive);
+
+    return activeSystems.map((system: GameSystem) => system.toResponse());
   }
 
   async findById(id: string): Promise<GameSystem> {
@@ -35,10 +35,10 @@ export class GameSystemsService {
   async create(createGameSystemRequest: CreateGameSystemRequest): Promise<GameSystem> {
     // Validate name uniqueness
     const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-    const existingSystems = await gameSystemsCollection.findAll();
-    
+    const existingSystems = await gameSystemsCollection.findAll() as GameSystem[];
+
     const nameExists = existingSystems.some(
-      system => system.name.toLowerCase() === createGameSystemRequest.name.toLowerCase()
+      (system: GameSystem) => system.name.toLowerCase() === createGameSystemRequest.name.toLowerCase()
     );
     
     if (nameExists) {
@@ -84,11 +84,12 @@ export class GameSystemsService {
 
       // Check name uniqueness (excluding current system)
       const gameSystemsCollection = await this.liteDbService.getCollection<GameSystem>('gameSystems');
-      const existingSystems = await gameSystemsCollection.findAll();
-      
+      const existingSystems = await gameSystemsCollection.findAll() as GameSystem[];
+      const requestedName = updateGameSystemRequest.name.trim().toLowerCase();
+
       const nameExists = existingSystems.some(
-        system => system.id !== id && 
-        system.name.toLowerCase() === updateGameSystemRequest.name.toLowerCase()
+        (system: GameSystem) => system.id !== id && 
+        system.name.toLowerCase() === requestedName
       );
       
       if (nameExists) {
@@ -141,9 +142,9 @@ export class GameSystemsService {
     const gameSystem = await this.findById(id);
     
     // Check if any worlds are using this system
-    const worldsCollection = await this.liteDbService.getCollection('worlds');
-    const worldsUsingSystem = await worldsCollection.findAll();
-    const activeWorlds = worldsUsingSystem.filter(world => world.gameSystemId === id);
+  const worldsCollection = await this.liteDbService.getCollection('worlds');
+  const worldsUsingSystem = await worldsCollection.findAll() as Array<{ gameSystemId: string }>;
+  const activeWorlds = worldsUsingSystem.filter((world) => world.gameSystemId === id);
     
     if (activeWorlds.length > 0) {
       throw new BadRequestException(
@@ -161,9 +162,9 @@ export class GameSystemsService {
     const gameSystem = await this.findById(id);
     
     // Check if any worlds are using this system
-    const worldsCollection = await this.liteDbService.getCollection('worlds');
-    const worldsUsingSystem = await worldsCollection.findAll();
-    const activeWorlds = worldsUsingSystem.filter(world => world.gameSystemId === id);
+  const worldsCollection = await this.liteDbService.getCollection('worlds');
+  const worldsUsingSystem = await worldsCollection.findAll() as Array<{ gameSystemId: string }>;
+  const activeWorlds = worldsUsingSystem.filter((world) => world.gameSystemId === id);
     
     if (activeWorlds.length > 0) {
       throw new BadRequestException(
@@ -177,12 +178,12 @@ export class GameSystemsService {
 
   async getUsageStats(): Promise<Record<string, number>> {
     const worldsCollection = await this.liteDbService.getCollection('worlds');
-    const worlds = await worldsCollection.findAll();
+    const worlds = await worldsCollection.findAll() as Array<{ gameSystemId: string }>;
     
     const usageStats: Record<string, number> = {};
     
     // Count worlds per game system
-    worlds.forEach(world => {
+    worlds.forEach((world) => {
       const systemId = world.gameSystemId;
       usageStats[systemId] = (usageStats[systemId] || 0) + 1;
     });

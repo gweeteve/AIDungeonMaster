@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.World = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 class World {
     constructor(data = {}) {
         Object.assign(this, data);
@@ -81,15 +82,18 @@ __decorate([
     __metadata("design:type", Object)
 ], World.prototype, "sessionData", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsDate)(),
+    (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], World.prototype, "lastAccessedAt", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsDate)(),
+    (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], World.prototype, "createdAt", void 0);
 __decorate([
-    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsDate)(),
+    (0, class_transformer_1.Type)(() => Date),
     __metadata("design:type", Date)
 ], World.prototype, "updatedAt", void 0);
 //# sourceMappingURL=world.entity.js.map

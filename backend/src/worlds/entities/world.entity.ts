@@ -1,32 +1,36 @@
-import { IsString, IsOptional, IsUUID, IsObject, IsDateString, Length } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsObject, IsDate, Length } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class World {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
   @Length(1, 255, { message: 'World name must be between 1 and 255 characters' })
-  name: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
   imageUrl?: string;
 
   @IsUUID()
-  gameSystemId: string;
+  gameSystemId!: string;
 
   @IsOptional()
   @IsObject()
   sessionData?: object;
 
-  @IsDateString()
-  lastAccessedAt: Date;
+  @IsDate()
+  @Type(() => Date)
+  lastAccessedAt!: Date;
 
-  @IsDateString()
-  createdAt: Date;
+  @IsDate()
+  @Type(() => Date)
+  createdAt!: Date;
 
-  @IsDateString()
-  updatedAt: Date;
+  @IsDate()
+  @Type(() => Date)
+  updatedAt!: Date;
 
   constructor(data: Partial<World> = {}) {
     Object.assign(this, data);

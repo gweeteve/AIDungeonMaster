@@ -176,7 +176,7 @@ let DocumentService = class DocumentService {
             !doc.isActive);
         return {
             ...document,
-            gameSystem,
+            gameSystem: gameSystem ?? undefined,
             previousVersions,
         };
     }

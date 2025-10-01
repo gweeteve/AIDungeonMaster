@@ -1,12 +1,12 @@
-import { IsString, IsOptional, IsUUID, Length, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUUID, Length, IsUrl, IsInt, IsObject } from 'class-validator';
 
 export class CreateWorldRequest {
   @IsString()
   @Length(1, 255, { message: 'World name must be between 1 and 255 characters' })
-  name: string;
+  name!: string;
 
   @IsUUID(4, { message: 'Game system ID must be a valid UUID' })
-  gameSystemId: string;
+  gameSystemId!: string;
 
   @IsOptional()
   @IsUrl({}, { message: 'Image URL must be a valid URL' })
@@ -28,26 +28,32 @@ export class UpdateWorldRequest {
 }
 
 export class WorldResponse {
-  id: string;
-  name: string;
+  id!: string;
+  name!: string;
   imageUrl?: string;
-  gameSystem: {
+  gameSystem!: {
     id: string;
     name: string;
     defaultImageUrl: string;
   };
-  lastAccessedAt: string;
-  createdAt: string;
+  lastAccessedAt!: string;
+  createdAt!: string;
 }
 
 export class LaunchResponse {
-  worldId: string;
-  launchUrl: string;
-  lastAccessedAt: string;
+  worldId!: string;
+  launchUrl!: string;
+  lastAccessedAt!: string;
 }
 
 export class ErrorResponse {
-  message: string;
-  statusCode: number;
+  @IsString()
+  message!: string;
+
+  @IsInt()
+  statusCode!: number;
+
+  @IsOptional()
+  @IsObject()
   details?: object;
 }

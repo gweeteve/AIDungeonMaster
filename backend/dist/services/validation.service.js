@@ -32,7 +32,10 @@ let ValidationService = class ValidationService {
             return [];
         }
         catch (error) {
-            return [`Schema validation error: ${error.message}`];
+            if (error instanceof Error) {
+                return [`Schema validation error: ${error.message}`];
+            }
+            return ['Schema validation error: Unknown error'];
         }
     }
     formatValidationErrors(errors) {

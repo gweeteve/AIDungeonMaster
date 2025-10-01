@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GameSystemSummary = exports.GameSystemResponse = exports.UpdateGameSystemRequest = exports.CreateGameSystemRequest = void 0;
+exports.ErrorResponse = exports.GameSystemSummary = exports.GameSystemResponse = exports.UpdateGameSystemRequest = exports.CreateGameSystemRequest = void 0;
 const class_validator_1 = require("class-validator");
 class CreateGameSystemRequest {
 }
@@ -75,4 +75,20 @@ exports.GameSystemResponse = GameSystemResponse;
 class GameSystemSummary {
 }
 exports.GameSystemSummary = GameSystemSummary;
+class ErrorResponse {
+}
+exports.ErrorResponse = ErrorResponse;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ErrorResponse.prototype, "message", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], ErrorResponse.prototype, "details", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], ErrorResponse.prototype, "statusCode", void 0);
 //# sourceMappingURL=index.js.map

@@ -24,3 +24,8 @@ export declare class GameSystemSummary {
     name: string;
     defaultImageUrl: string;
 }
+export declare class ErrorResponse {
+    message: string;
+    details?: object;
+    statusCode: number;
+}

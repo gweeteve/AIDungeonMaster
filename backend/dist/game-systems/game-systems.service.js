@@ -24,8 +24,8 @@ let GameSystemsService = class GameSystemsService {
     async findAllActive() {
         const gameSystemsCollection = await this.liteDbService.getCollection('gameSystems');
         const allSystems = await gameSystemsCollection.findAll();
-        const activeSystems = allSystems.filter(system => system.isActive);
-        return activeSystems.map(system => system.toResponse());
+        const activeSystems = allSystems.filter((system) => system.isActive);
+        return activeSystems.map((system) => system.toResponse());
     }
     async findById(id) {
         const gameSystemsCollection = await this.liteDbService.getCollection('gameSystems');
@@ -38,7 +38,7 @@ let GameSystemsService = class GameSystemsService {
     async create(createGameSystemRequest) {
         const gameSystemsCollection = await this.liteDbService.getCollection('gameSystems');
         const existingSystems = await gameSystemsCollection.findAll();
-        const nameExists = existingSystems.some(system => system.name.toLowerCase() === createGameSystemRequest.name.toLowerCase());
+        const nameExists = existingSystems.some((system) => system.name.toLowerCase() === createGameSystemRequest.name.toLowerCase());
         if (nameExists) {
             throw new common_1.BadRequestException(`Game system with name '${createGameSystemRequest.name}' already exists`);
         }
@@ -71,8 +71,9 @@ let GameSystemsService = class GameSystemsService {
             }
             const gameSystemsCollection = await this.liteDbService.getCollection('gameSystems');
             const existingSystems = await gameSystemsCollection.findAll();
-            const nameExists = existingSystems.some(system => system.id !== id &&
-                system.name.toLowerCase() === updateGameSystemRequest.name.toLowerCase());
+            const requestedName = updateGameSystemRequest.name.trim().toLowerCase();
+            const nameExists = existingSystems.some((system) => system.id !== id &&
+                system.name.toLowerCase() === requestedName);
             if (nameExists) {
                 throw new common_1.BadRequestException(`Game system with name '${updateGameSystemRequest.name}' already exists`);
             }
@@ -115,7 +116,7 @@ let GameSystemsService = class GameSystemsService {
         const gameSystem = await this.findById(id);
         const worldsCollection = await this.liteDbService.getCollection('worlds');
         const worldsUsingSystem = await worldsCollection.findAll();
-        const activeWorlds = worldsUsingSystem.filter(world => world.gameSystemId === id);
+        const activeWorlds = worldsUsingSystem.filter((world) => world.gameSystemId === id);
         if (activeWorlds.length > 0) {
             throw new common_1.BadRequestException(`Cannot deactivate game system. ${activeWorlds.length} world(s) are still using this system.`);
         }
@@ -127,7 +128,7 @@ let GameSystemsService = class GameSystemsService {
         const gameSystem = await this.findById(id);
         const worldsCollection = await this.liteDbService.getCollection('worlds');
         const worldsUsingSystem = await worldsCollection.findAll();
-        const activeWorlds = worldsUsingSystem.filter(world => world.gameSystemId === id);
+        const activeWorlds = worldsUsingSystem.filter((world) => world.gameSystemId === id);
         if (activeWorlds.length > 0) {
             throw new common_1.BadRequestException(`Cannot delete game system. ${activeWorlds.length} world(s) are still using this system.`);
         }
@@ -138,7 +139,7 @@ let GameSystemsService = class GameSystemsService {
         const worldsCollection = await this.liteDbService.getCollection('worlds');
         const worlds = await worldsCollection.findAll();
         const usageStats = {};
-        worlds.forEach(world => {
+        worlds.forEach((world) => {
             const systemId = world.gameSystemId;
             usageStats[systemId] = (usageStats[systemId] || 0) + 1;
         });
