@@ -1,7 +1,7 @@
 module.exports = {
   extends: [
-    'next/core-web-vitals',
-    '@typescript-eslint/recommended',
+  'next/core-web-vitals',
+  'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
@@ -12,6 +12,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-unused-vars': 'error',
+  '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/explicit-function-return-type': 'error',
     '@typescript-eslint/prefer-nullish-coalescing': 'error',
     '@typescript-eslint/prefer-optional-chain': 'error',

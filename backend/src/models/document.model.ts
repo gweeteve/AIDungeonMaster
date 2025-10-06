@@ -69,7 +69,7 @@ export class Document {
   updatedAt: Date;
 
   // Relationships (not stored directly, populated by services)
-  gameSystem?: GameSystem;
+  gameSystem?: GameSystem | null;
   uploader?: User;
   previousVersions?: Document[];
 

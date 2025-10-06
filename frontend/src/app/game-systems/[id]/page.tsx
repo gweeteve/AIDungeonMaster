@@ -1,9 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DocumentList } from '@/components/documents/document-list';
 import { DocumentUpload } from '@/components/documents/document-upload';
@@ -12,23 +19,21 @@ import { GameSystem, UpdateGameSystemRequest } from '@/types/game-system.types';
 import { Document, CreateDocumentRequest } from '@/types/document.types';
 import { gameSystemService } from '@/services/game-system.service';
 import { documentService } from '@/services/document.service';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  Lock, 
-  Unlock, 
-  Users, 
-  Clock, 
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Lock,
+  Unlock,
+  Users,
+  Clock,
   FileText,
   Settings,
-  Download
 } from 'lucide-react';
 
 type ViewMode = 'details' | 'edit' | 'upload';
 
-export default function GameSystemDetailsPage(): JSX.Element {
+export default function GameSystemDetailsPage(): React.JSX.Element {
   const params = useParams();
   const router = useRouter();
   const gameSystemId = params.id as string;
@@ -42,16 +47,25 @@ export default function GameSystemDetailsPage(): JSX.Element {
 
   const currentUserId = 'mock-user-id'; // TODO: Get from auth context
 
-  useEffect(() => {
-    if (gameSystemId) {
-      loadGameSystemDetails();
+  const loadDocuments = useCallback(async (): Promise<Document[]> => {
+    try {
+      setDocumentsLoading(true);
+      const documentsData =
+        await documentService.getDocumentsByGameSystem(gameSystemId);
+      setDocuments(documentsData);
+      return documentsData;
+    } catch (error) {
+      console.error('Failed to load documents:', error);
+      return [];
+    } finally {
+      setDocumentsLoading(false);
     }
   }, [gameSystemId]);
 
-  const loadGameSystemDetails = async (): Promise<void> => {
+  const loadGameSystemDetails = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
-      const [systemData, documentsData] = await Promise.all([
+      const [systemData] = await Promise.all([
         gameSystemService.getGameSystem(gameSystemId),
         loadDocuments(),
       ]);
@@ -62,28 +76,23 @@ export default function GameSystemDetailsPage(): JSX.Element {
     } finally {
       setLoading(false);
     }
-  };
+  }, [gameSystemId, loadDocuments]);
 
-  const loadDocuments = async (): Promise<Document[]> => {
-    try {
-      setDocumentsLoading(true);
-      const documentsData = await documentService.getDocumentsByGameSystem(gameSystemId);
-      setDocuments(documentsData);
-      return documentsData;
-    } catch (error) {
-      console.error('Failed to load documents:', error);
-      return [];
-    } finally {
-      setDocumentsLoading(false);
+  useEffect(() => {
+    if (gameSystemId) {
+      void loadGameSystemDetails();
     }
-  };
+  }, [gameSystemId, loadGameSystemDetails]);
 
   const handleEdit = (): void => {
     setViewMode('edit');
   };
 
   const handleDelete = async (): Promise<void> => {
-    if (!gameSystem || !confirm(`Are you sure you want to delete "${gameSystem.name}"?`)) {
+    if (
+      !gameSystem ||
+      !confirm(`Are you sure you want to delete "${gameSystem.name}"?`)
+    ) {
       return;
     }
 
@@ -132,11 +141,16 @@ export default function GameSystemDetailsPage(): JSX.Element {
     }
   };
 
-  const handleUpdateSubmit = async (data: UpdateGameSystemRequest): Promise<void> => {
+  const handleUpdateSubmit = async (
+    data: UpdateGameSystemRequest
+  ): Promise<void> => {
     if (!gameSystem) return;
 
     try {
-      const updatedSystem = await gameSystemService.updateGameSystem(gameSystem.id, data);
+      const updatedSystem = await gameSystemService.updateGameSystem(
+        gameSystem.id,
+        data
+      );
       setGameSystem(updatedSystem);
       setViewMode('details');
       // TODO: Show success toast
@@ -150,7 +164,9 @@ export default function GameSystemDetailsPage(): JSX.Element {
     setViewMode('upload');
   };
 
-  const handleDocumentUploadSubmit = async (data: CreateDocumentRequest): Promise<void> => {
+  const handleDocumentUploadSubmit = async (
+    data: CreateDocumentRequest
+  ): Promise<void> => {
     try {
       await documentService.uploadDocument(gameSystemId, data);
       await loadDocuments(); // Refresh documents list
@@ -162,12 +178,12 @@ export default function GameSystemDetailsPage(): JSX.Element {
     }
   };
 
-  const handleDocumentDownload = async (document: Document): Promise<void> => {
+  const handleDocumentDownload = async (doc: Document): Promise<void> => {
     try {
-      const url = await documentService.downloadDocumentAsUrl(document.id);
-      const link = document.createElement('a');
+      const url = await documentService.downloadDocumentAsUrl(doc.id);
+      const link = window.document.createElement('a');
       link.href = url;
-      link.download = document.filename;
+      link.download = doc.filename;
       link.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -176,13 +192,13 @@ export default function GameSystemDetailsPage(): JSX.Element {
     }
   };
 
-  const handleDocumentDelete = async (document: Document): Promise<void> => {
-    if (!confirm(`Are you sure you want to delete "${document.displayName}"?`)) {
+  const handleDocumentDelete = async (doc: Document): Promise<void> => {
+    if (!confirm(`Are you sure you want to delete "${doc.displayName}"?`)) {
       return;
     }
 
     try {
-      await documentService.deleteDocument(document.id);
+      await documentService.deleteDocument(doc.id);
       await loadDocuments(); // Refresh documents list
       // TODO: Show success toast
     } catch (error) {
@@ -191,11 +207,14 @@ export default function GameSystemDetailsPage(): JSX.Element {
     }
   };
 
-  const isLocked = gameSystem?.editLockUserId && 
-    gameSystem?.editLockExpiresAt && 
-    new Date(gameSystem.editLockExpiresAt) > new Date();
+  const isLocked = Boolean(
+    gameSystem?.editLockUserId &&
+      gameSystem?.editLockExpiresAt &&
+      new Date(gameSystem.editLockExpiresAt) > new Date()
+  );
 
-  const isLockedByCurrentUser = isLocked && gameSystem?.editLockUserId === currentUserId;
+  const isLockedByCurrentUser =
+    isLocked && gameSystem?.editLockUserId === currentUserId;
 
   const formatTimeAgo = (dateString: string): string => {
     const now = new Date();
@@ -213,11 +232,11 @@ export default function GameSystemDetailsPage(): JSX.Element {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="h-32 bg-muted rounded"></div>
-          <div className="h-64 bg-muted rounded"></div>
+      <div className='container mx-auto px-4 py-8'>
+        <div className='animate-pulse space-y-6'>
+          <div className='h-8 bg-muted rounded w-1/3'></div>
+          <div className='h-32 bg-muted rounded'></div>
+          <div className='h-64 bg-muted rounded'></div>
         </div>
       </div>
     );
@@ -225,14 +244,15 @@ export default function GameSystemDetailsPage(): JSX.Element {
 
   if (!gameSystem) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-bold mb-2">Game System Not Found</h1>
-          <p className="text-muted-foreground mb-4">
-            The game system you're looking for doesn't exist or has been deleted.
+      <div className='container mx-auto px-4 py-8'>
+        <div className='text-center py-12'>
+          <h1 className='text-2xl font-bold mb-2'>Game System Not Found</h1>
+          <p className='text-muted-foreground mb-4'>
+            The game system you’re looking for doesn’t exist or has been
+            deleted.
           </p>
           <Button onClick={() => router.push('/game-systems')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className='h-4 w-4 mr-2' />
             Back to Game Systems
           </Button>
         </div>
@@ -242,7 +262,7 @@ export default function GameSystemDetailsPage(): JSX.Element {
 
   if (viewMode === 'edit') {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className='container mx-auto px-4 py-8'>
         <EditGameSystemForm
           gameSystem={gameSystem}
           onSubmit={handleUpdateSubmit}
@@ -254,9 +274,8 @@ export default function GameSystemDetailsPage(): JSX.Element {
 
   if (viewMode === 'upload') {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className='container mx-auto px-4 py-8'>
         <DocumentUpload
-          gameSystemId={gameSystem.id}
           onSubmit={handleDocumentUploadSubmit}
           onCancel={() => setViewMode('details')}
         />
@@ -265,17 +284,21 @@ export default function GameSystemDetailsPage(): JSX.Element {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className='container mx-auto px-4 py-8 space-y-6'>
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => router.push('/game-systems')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
+      <div className='flex items-center gap-4'>
+        <Button
+          variant='ghost'
+          size='sm'
+          onClick={() => router.push('/game-systems')}
+        >
+          <ArrowLeft className='h-4 w-4 mr-2' />
           Back
         </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{gameSystem.name}</h1>
+        <div className='flex-1'>
+          <h1 className='text-2xl font-bold'>{gameSystem.name}</h1>
           {gameSystem.description && (
-            <p className="text-muted-foreground">{gameSystem.description}</p>
+            <p className='text-muted-foreground'>{gameSystem.description}</p>
           )}
         </div>
       </div>
@@ -283,13 +306,15 @@ export default function GameSystemDetailsPage(): JSX.Element {
       {/* System Info Card */}
       <Card>
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-4">
+          <div className='flex items-start justify-between'>
+            <div className='flex items-center gap-4'>
               {gameSystem.imageUrl && (
-                <img
+                <Image
                   src={gameSystem.imageUrl}
                   alt={gameSystem.name}
-                  className="h-16 w-16 rounded-lg object-cover"
+                  width={64}
+                  height={64}
+                  className='h-16 w-16 rounded-lg object-cover'
                 />
               )}
               <div>
@@ -300,94 +325,90 @@ export default function GameSystemDetailsPage(): JSX.Element {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className='flex gap-2'>
               {isLocked ? (
                 isLockedByCurrentUser ? (
                   <Button
-                    variant="outline"
-                    size="sm"
+                    variant='outline'
+                    size='sm'
                     onClick={handleReleaseLock}
                     disabled={actionLoading}
                   >
-                    <Unlock className="h-4 w-4 mr-2" />
+                    <Unlock className='h-4 w-4 mr-2' />
                     Release Lock
                   </Button>
                 ) : (
-                  <Badge variant="destructive">
-                    <Lock className="w-3 h-3 mr-1" />
+                  <Badge variant='destructive'>
+                    <Lock className='w-3 h-3 mr-1' />
                     Locked
                   </Badge>
                 )
               ) : (
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={handleAcquireLock}
                   disabled={actionLoading}
                 >
-                  <Lock className="h-4 w-4 mr-2" />
+                  <Lock className='h-4 w-4 mr-2' />
                   Acquire Lock
                 </Button>
               )}
 
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={handleEdit}
                 disabled={isLocked && !isLockedByCurrentUser}
               >
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className='h-4 w-4 mr-2' />
                 Edit
               </Button>
 
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={handleDelete}
                 disabled={isLocked && !isLockedByCurrentUser}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className='h-4 w-4' />
               </Button>
             </div>
           </div>
         </CardHeader>
 
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Clock className='h-4 w-4' />
               Created {formatTimeAgo(gameSystem.createdAt)}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <FileText className="h-4 w-4" />
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <FileText className='h-4 w-4' />
               {documents.length} document{documents.length !== 1 ? 's' : ''}
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Users className='h-4 w-4' />
               {gameSystem.isPublic ? 'Collaborative' : 'Private'}
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className='flex flex-wrap gap-2 mt-4'>
             {gameSystem.parentSystemId && (
-              <Badge variant="secondary">
-                Derived System
-              </Badge>
+              <Badge variant='secondary'>Derived System</Badge>
             )}
-            
+
             {gameSystem.validationSchema && (
-              <Badge variant="outline">
-                <Settings className="w-3 h-3 mr-1" />
+              <Badge variant='outline'>
+                <Settings className='w-3 h-3 mr-1' />
                 Custom Validation
               </Badge>
             )}
 
             {gameSystem.syncWithParent && gameSystem.parentSystemId && (
-              <Badge variant="outline">
-                Syncs with Parent
-              </Badge>
+              <Badge variant='outline'>Syncs with Parent</Badge>
             )}
           </div>
         </CardContent>

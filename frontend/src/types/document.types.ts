@@ -22,6 +22,12 @@ export interface Document {
   previousVersions?: Document[];
 }
 
+export interface ApiError {
+  message: string;
+  statusCode?: number;
+  details?: unknown;
+}
+
 export interface CreateDocumentRequest {
   file: File;
   displayName: string;
@@ -157,7 +163,15 @@ export interface DocumentValidationStatus {
 }
 
 // File type definitions
-export const SUPPORTED_FILE_TYPES = {
+export const SUPPORTED_FILE_TYPES: Record<
+  Document['type'],
+  {
+    extensions: string[];
+    mimeTypes: string[];
+    icon: string;
+    color: string;
+  }
+> = {
   JSON: {
     extensions: ['.json'],
     mimeTypes: ['application/json'],
@@ -176,7 +190,7 @@ export const SUPPORTED_FILE_TYPES = {
     icon: 'FileText',
     color: 'text-green-600',
   },
-} as const;
+};
 
 // Utility functions types
 export interface FileTypeInfo {

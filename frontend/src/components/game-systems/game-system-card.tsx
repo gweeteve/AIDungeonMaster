@@ -1,5 +1,13 @@
 import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { GameSystem } from '@/types/game-system.types';
@@ -23,12 +31,15 @@ export function GameSystemCard({
   onSelect,
   isSelected = false,
   currentUserId,
-}: GameSystemCardProps): JSX.Element {
-  const isLocked = gameSystem.editLockUserId && 
-    gameSystem.editLockExpiresAt && 
-    new Date(gameSystem.editLockExpiresAt) > new Date();
+}: GameSystemCardProps): React.JSX.Element {
+  const isLocked = Boolean(
+    gameSystem.editLockUserId &&
+      gameSystem.editLockExpiresAt &&
+      new Date(gameSystem.editLockExpiresAt) > new Date()
+  );
 
-  const isLockedByCurrentUser = isLocked && gameSystem.editLockUserId === currentUserId;
+  const isLockedByCurrentUser =
+    isLocked && gameSystem.editLockUserId === currentUserId;
 
   const handleCardClick = (): void => {
     if (onSelect) {
@@ -77,114 +88,112 @@ export function GameSystemCard({
   };
 
   return (
-    <Card 
+    <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
         isSelected ? 'ring-2 ring-primary' : ''
       }`}
       onClick={handleCardClick}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg">{gameSystem.name}</CardTitle>
+      <CardHeader className='pb-3'>
+        <div className='flex items-start justify-between'>
+          <div className='flex-1'>
+            <CardTitle className='text-lg'>{gameSystem.name}</CardTitle>
             {gameSystem.description && (
-              <CardDescription className="mt-1 line-clamp-2">
+              <CardDescription className='mt-1 line-clamp-2'>
                 {gameSystem.description}
               </CardDescription>
             )}
           </div>
           {gameSystem.imageUrl && (
-            <img
+            <Image
               src={gameSystem.imageUrl}
               alt={gameSystem.name}
-              className="ml-3 h-12 w-12 rounded-md object-cover"
+              width={48}
+              height={48}
+              className='ml-3 h-12 w-12 rounded-md object-cover'
             />
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-3">
+        <div className='flex flex-wrap gap-2 mt-3'>
           {gameSystem.parentSystemId && (
-            <Badge variant="secondary">
-              Derived System
-            </Badge>
+            <Badge variant='secondary'>Derived System</Badge>
           )}
-          
+
           {gameSystem.validationSchema && (
-            <Badge variant="outline">
-              <FileText className="w-3 h-3 mr-1" />
+            <Badge variant='outline'>
+              <FileText className='w-3 h-3 mr-1' />
               Schema
             </Badge>
           )}
 
           {isLocked && (
             <Badge variant={isLockedByCurrentUser ? 'default' : 'destructive'}>
-              <Lock className="w-3 h-3 mr-1" />
+              <Lock className='w-3 h-3 mr-1' />
               {isLockedByCurrentUser ? 'Locked by you' : 'Locked'}
             </Badge>
           )}
 
           {gameSystem.isPublic && (
-            <Badge variant="outline">
-              <Users className="w-3 h-3 mr-1" />
+            <Badge variant='outline'>
+              <Users className='w-3 h-3 mr-1' />
               Collaborative
             </Badge>
           )}
         </div>
       </CardHeader>
 
-      <CardContent className="pb-3">
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Clock className="w-4 h-4 mr-1" />
+      <CardContent className='pb-3'>
+        <div className='flex items-center text-sm text-muted-foreground'>
+          <Clock className='w-4 h-4 mr-1' />
           Updated {formatTimeAgo(gameSystem.updatedAt)}
         </div>
 
         {gameSystem.documents && gameSystem.documents.length > 0 && (
-          <div className="mt-2 text-sm text-muted-foreground">
-            {gameSystem.documents.length} document{gameSystem.documents.length > 1 ? 's' : ''}
+          <div className='mt-2 text-sm text-muted-foreground'>
+            {gameSystem.documents.length} document
+            {gameSystem.documents.length > 1 ? 's' : ''}
           </div>
         )}
 
         {gameSystem.derivedSystems && gameSystem.derivedSystems.length > 0 && (
-          <div className="mt-1 text-sm text-muted-foreground">
-            {gameSystem.derivedSystems.length} derived system{gameSystem.derivedSystems.length > 1 ? 's' : ''}
+          <div className='mt-1 text-sm text-muted-foreground'>
+            {gameSystem.derivedSystems.length} derived system
+            {gameSystem.derivedSystems.length > 1 ? 's' : ''}
           </div>
         )}
       </CardContent>
 
-      <CardFooter className="pt-0">
-        <div className="flex gap-2 w-full">
+      <CardFooter className='pt-0'>
+        <div className='flex gap-2 w-full'>
           {onEdit && (
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={handleEdit}
               disabled={isLocked && !isLockedByCurrentUser}
             >
-              <Settings className="w-4 h-4 mr-1" />
+              <Settings className='w-4 h-4 mr-1' />
               Edit
             </Button>
           )}
 
           {onDerive && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDerive}
-            >
+            <Button variant='outline' size='sm' onClick={handleDerive}>
               Derive
             </Button>
           )}
 
-          <div className="flex-1" />
+          <div className='flex-1' />
 
           {onDelete && (
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={handleDelete}
               disabled={isLocked && !isLockedByCurrentUser}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className='w-4 h-4' />
             </Button>
           )}
         </div>

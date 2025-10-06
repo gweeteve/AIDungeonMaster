@@ -1,6 +1,7 @@
 {
-  "name": "backend",
+  "name": "@aidungeonmaster/backend",
   "version": "1.0.0",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "nest build",
@@ -42,9 +43,9 @@
     "@nestjs/testing": "^11.1.6",
     "@types/jest": "^30.0.0",
     "@types/supertest": "^6.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.44.1",
-    "@typescript-eslint/parser": "^8.44.1",
-    "eslint": "^9.36.0",
+  "@typescript-eslint/eslint-plugin": "^6.21.0",
+  "@typescript-eslint/parser": "^6.21.0",
+  "eslint": "^8.57.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",

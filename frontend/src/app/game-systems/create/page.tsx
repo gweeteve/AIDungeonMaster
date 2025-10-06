@@ -6,7 +6,7 @@ import { CreateGameSystemForm } from '@/components/game-systems/create-form';
 import { CreateGameSystemRequest } from '@/types/game-system.types';
 import { gameSystemService } from '@/services/game-system.service';
 
-export default function CreateGameSystemPage(): JSX.Element {
+export default function CreateGameSystemPage(): React.JSX.Element {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
 
@@ -30,7 +30,7 @@ export default function CreateGameSystemPage(): JSX.Element {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className='container mx-auto px-4 py-8'>
       <CreateGameSystemForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}

@@ -14,7 +14,7 @@ interface PageState {
   parentSystem?: GameSystem;
 }
 
-export default function GameSystemsPage(): JSX.Element {
+export default function GameSystemsPage(): React.JSX.Element {
   const router = useRouter();
   const [gameSystems, setGameSystems] = useState<GameSystem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,9 @@ export default function GameSystemsPage(): JSX.Element {
     }
   };
 
-  const handleCreateSubmit = async (data: CreateGameSystemRequest): Promise<void> => {
+  const handleCreateSubmit = async (
+    data: CreateGameSystemRequest
+  ): Promise<void> => {
     try {
       setCreating(true);
       const newSystem = await gameSystemService.createGameSystem(data);
@@ -94,7 +96,7 @@ export default function GameSystemsPage(): JSX.Element {
 
   if (pageState.mode === 'create') {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className='container mx-auto px-4 py-8'>
         <CreateGameSystemForm
           onSubmit={handleCreateSubmit}
           onCancel={handleCancel}
@@ -106,7 +108,7 @@ export default function GameSystemsPage(): JSX.Element {
 
   if (pageState.mode === 'derive' && pageState.parentSystem) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className='container mx-auto px-4 py-8'>
         <CreateGameSystemForm
           onSubmit={handleCreateSubmit}
           onCancel={handleCancel}
@@ -118,7 +120,7 @@ export default function GameSystemsPage(): JSX.Element {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className='container mx-auto px-4 py-8'>
       <GameSystemList
         gameSystems={gameSystems}
         loading={loading}

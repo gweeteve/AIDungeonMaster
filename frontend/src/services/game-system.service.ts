@@ -12,13 +12,15 @@ class GameSystemService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      throw new Error(
+        errorData.message ?? `HTTP ${response.status}: ${response.statusText}`
+      );
     }
     return response.json();
   }
@@ -31,16 +33,18 @@ class GameSystemService {
     };
   }
 
-  async getGameSystems(options: GameSystemQueryOptions = {}): Promise<PaginatedGameSystemsResponse> {
+  async getGameSystems(
+    options: GameSystemQueryOptions = {}
+  ): Promise<PaginatedGameSystemsResponse> {
     const searchParams = new URLSearchParams();
-    
+
     if (options.page) searchParams.set('page', options.page.toString());
     if (options.limit) searchParams.set('limit', options.limit.toString());
     if (options.search) searchParams.set('search', options.search);
     if (options.ownerId) searchParams.set('ownerId', options.ownerId);
 
     const url = `${this.baseUrl}/api/game-systems?${searchParams.toString()}`;
-    
+
     const response = await fetch(url, {
       method: 'GET',
       headers: this.getAuthHeaders(),
@@ -68,7 +72,10 @@ class GameSystemService {
     return this.handleResponse<GameSystem>(response);
   }
 
-  async updateGameSystem(id: string, data: UpdateGameSystemRequest): Promise<GameSystem> {
+  async updateGameSystem(
+    id: string,
+    data: UpdateGameSystemRequest
+  ): Promise<GameSystem> {
     const response = await fetch(`${this.baseUrl}/api/game-systems/${id}`, {
       method: 'PUT',
       headers: this.getAuthHeaders(),
@@ -86,28 +93,34 @@ class GameSystemService {
 
     if (!response.ok) {
       const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || `Failed to delete game system`);
+      throw new Error(errorData.message ?? 'Failed to delete game system');
     }
   }
 
   async acquireLock(id: string): Promise<EditLock> {
-    const response = await fetch(`${this.baseUrl}/api/game-systems/${id}/lock`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${this.baseUrl}/api/game-systems/${id}/lock`,
+      {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+      }
+    );
 
     return this.handleResponse<EditLock>(response);
   }
 
   async releaseLock(id: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/api/game-systems/${id}/lock`, {
-      method: 'DELETE',
-      headers: this.getAuthHeaders(),
-    });
+    const response = await fetch(
+      `${this.baseUrl}/api/game-systems/${id}/lock`,
+      {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      }
+    );
 
     if (!response.ok) {
       const errorData: ApiError = await response.json();
-      throw new Error(errorData.message || `Failed to release lock`);
+      throw new Error(errorData.message ?? 'Failed to release lock');
     }
   }
 
@@ -125,7 +138,9 @@ class GameSystemService {
   async getDerivedSystems(parentId: string): Promise<GameSystem[]> {
     // This would be implemented by filtering systems with parentSystemId
     const allSystems = await this.getGameSystems({ limit: 1000 });
-    return allSystems.data.filter(system => system.parentSystemId === parentId);
+    return allSystems.data.filter(
+      (system) => system.parentSystemId === parentId
+    );
   }
 
   // Validation helpers
@@ -160,7 +175,7 @@ class GameSystemService {
   }
 
   getGameSystemImageUrl(gameSystem: GameSystem): string {
-    return gameSystem.imageUrl || '/images/default-game-system.png';
+    return gameSystem.imageUrl ?? '/images/default-game-system.png';
   }
 
   isLocked(gameSystem: GameSystem): boolean {
@@ -170,27 +185,32 @@ class GameSystemService {
     return new Date(gameSystem.editLockExpiresAt) > new Date();
   }
 
-  isLockedByCurrentUser(gameSystem: GameSystem, currentUserId: string): boolean {
-    return this.isLocked(gameSystem) && gameSystem.editLockUserId === currentUserId;
+  isLockedByCurrentUser(
+    gameSystem: GameSystem,
+    currentUserId: string
+  ): boolean {
+    return (
+      this.isLocked(gameSystem) && gameSystem.editLockUserId === currentUserId
+    );
   }
 
   getLockTimeRemaining(gameSystem: GameSystem): number | null {
     if (!gameSystem.editLockExpiresAt) return null;
-    
+
     const expiresAt = new Date(gameSystem.editLockExpiresAt);
     const now = new Date();
     const remaining = expiresAt.getTime() - now.getTime();
-    
+
     return remaining > 0 ? remaining : 0;
   }
 
   formatLockTimeRemaining(gameSystem: GameSystem): string | null {
     const remaining = this.getLockTimeRemaining(gameSystem);
     if (remaining === null) return null;
-    
+
     const minutes = Math.floor(remaining / (1000 * 60));
     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-    
+
     if (minutes > 0) {
       return `${minutes}m ${seconds}s`;
     } else {

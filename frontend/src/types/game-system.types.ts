@@ -135,6 +135,6 @@ export interface ValidationError extends ApiError {
   validationErrors: Array<{
     field: string;
     message: string;
-    value?: any;
+    value?: unknown;
   }>;
 }
