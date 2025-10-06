@@ -31,7 +31,6 @@ export class ValidationService {
       if (error instanceof Error) {
         return [`Schema validation error: ${error.message}`];
       }
-
       return ['Schema validation error: Unknown error'];
     }
   }

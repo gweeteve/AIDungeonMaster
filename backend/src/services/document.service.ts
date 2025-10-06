@@ -231,7 +231,7 @@ export class DocumentService implements IDocumentService {
     }
 
     // Get related data
-    const gameSystem = await this.gameSystemService.findById(document.gameSystemId);
+  const gameSystem = await this.gameSystemService.findById(document.gameSystemId);
     
     // Get previous versions (would be implemented with proper versioning)
     const previousVersions = Array.from(this.documents.values()).filter(
@@ -243,7 +243,7 @@ export class DocumentService implements IDocumentService {
 
     return {
       ...document,
-      gameSystem,
+      gameSystem: gameSystem ?? undefined,
       previousVersions,
     };
   }
